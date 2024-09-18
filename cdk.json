@@ -1,18 +1,7 @@
 {
   "app": "npx tsx bin/person-service-rust.ts",
   "watch": {
-    "include": ["**"],
-    "exclude": [
-      "README.md",
-      "cdk*.json",
-      "**/*.d.ts",
-      "**/*.js",
-      "tsconfig.json",
-      "package*.json",
-      "yarn.lock",
-      "node_modules",
-      "test"
-    ]
+    "include": ["bin", "lib", "src"]
   },
   "context": {
     "@aws-cdk/aws-lambda:recognizeLayerVersion": true,

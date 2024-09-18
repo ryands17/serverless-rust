@@ -14,6 +14,9 @@ dependencies:
   source-map-support:
     specifier: ^0.5.21
     version: 0.5.21
+  zod:
+    specifier: 3.23.8
+    version: 3.23.8
 
 devDependencies:
   '@types/node':
@@ -917,3 +920,7 @@ packages:
     resolution: {integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==}
     engines: {node: '>=6'}
     dev: true
+
+  /zod@3.23.8:
+    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
+    dev: false

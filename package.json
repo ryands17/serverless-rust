@@ -6,9 +6,13 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:fns": "cargo lambda build --release --arm64",
+    "build:fns:dev": "cargo lambda build --arm64",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
+    "dev": "pnpm build:fns:dev && pnpm cdk deploy --watch --require-approval=never",
+    "deploy": "pnpm build:fns && pnpm cdk deploy",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -24,13 +28,15 @@
   "dependencies": {
     "aws-cdk-lib": "2.158.0",
     "constructs": "^10.0.0",
-    "source-map-support": "^0.5.21"
+    "source-map-support": "^0.5.21",
+    "zod": "3.23.8"
   },
   "prettier": {
     "singleQuote": true
   },
   "lint-staged": {
-    "*.{js,ts,json,md}": "prettier --write"
+    "*.{js,ts,json,md}": "prettier --write",
+    "*.rs": "cargo fmt --all --"
   },
   "packageManager": "pnpm@8.7.4+sha1.9dfcac89c4010a00ce092c3cda76dab72cd99198"
 }
