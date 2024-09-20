@@ -11,7 +11,7 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "dev": "pnpm build:fns:dev && pnpm cdk deploy --watch --require-approval=never",
+    "dev": "pnpm cdk deploy --watch --require-approval=never",
     "deploy": "pnpm build:fns && pnpm cdk deploy",
     "prepare": "husky"
   },

@@ -3,6 +3,7 @@ import * as apiGw from 'aws-cdk-lib/aws-apigatewayv2';
 import * as apiGwInteg from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as ddb from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
 import { ApplyDestroyPolicyAspect, RustFunction } from './cdk-utils';
 
@@ -17,6 +18,11 @@ interface Props extends cdk.StackProps {
 export class PersonServiceRustStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: Props) {
     super(scope, id, props);
+
+    const personsTable = new ddb.Table(this, 'personsTable', {
+      partitionKey: { name: 'firstName', type: ddb.AttributeType.STRING },
+      billingMode: ddb.BillingMode.PAY_PER_REQUEST,
+    });
 
     const apiName = 'personApi';
     // API Gateway logs
@@ -49,11 +55,18 @@ export class PersonServiceRustStack extends cdk.Stack {
       }),
     };
 
-    const hello = new RustFunction(this, 'function1');
+    const addPerson = new RustFunction(this, 'add_person', {
+      environment: { TABLE_NAME: personsTable.tableName },
+    });
+    personsTable.grantWriteData(addPerson.fn);
+
     api.addRoutes({
       path: '/',
-      methods: [apiGw.HttpMethod.GET],
-      integration: new apiGwInteg.HttpLambdaIntegration('helloWorld', hello.fn),
+      methods: [apiGw.HttpMethod.POST],
+      integration: new apiGwInteg.HttpLambdaIntegration(
+        'addPerson',
+        addPerson.fn,
+      ),
     });
 
     new cdk.CfnOutput(this, 'apiUrl', { value: api.apiEndpoint });
