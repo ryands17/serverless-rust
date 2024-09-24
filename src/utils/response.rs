@@ -1,16 +1,7 @@
 use lambda_http::{http::StatusCode, Response};
 use serde_json::{json, Value};
 
-fn merge(a: &mut Value, b: Value) {
-    match (a, b) {
-        (Value::Object(a), Value::Object(b)) => {
-            for (k, v) in b {
-                merge(a.entry(k).or_insert(Value::Null), v);
-            }
-        }
-        (a, b) => *a = b,
-    }
-}
+use super::json::merge;
 
 pub fn api_response<T: serde::Serialize>(status_code: StatusCode, body: T) -> Response<String> {
     if status_code.is_success() {

@@ -6,7 +6,7 @@ use lambda_http::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use simple_fn::response::api_response;
+use simple_fn::utils::response;
 use ulid::Ulid;
 
 #[derive(Debug, Serialize, Deserialize, Builder)]
@@ -46,14 +46,20 @@ impl Lambda {
         let body: Option<LambdaInput> = match event.payload() {
             Ok(p) => p,
             Err(e) => {
-                return Ok(api_response(StatusCode::BAD_REQUEST, e.to_string()));
+                return Ok(response::api_response(
+                    StatusCode::BAD_REQUEST,
+                    e.to_string(),
+                ));
             }
         };
 
         let input = match body {
             Some(p) => p,
             None => {
-                return Ok(api_response(StatusCode::BAD_REQUEST, "Invalid payload"));
+                return Ok(response::api_response(
+                    StatusCode::BAD_REQUEST,
+                    "Invalid payload",
+                ));
             }
         };
 
@@ -71,11 +77,11 @@ impl Lambda {
 
         match put_item_request {
             Ok(_) => {
-                let resp = api_response(StatusCode::OK, json!({ "person": person }));
+                let resp = response::api_response(StatusCode::OK, json!({ "person": person }));
                 Ok(resp)
             }
             Err(_) => {
-                let resp = api_response(
+                let resp = response::api_response(
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Error storing person info",
                 );
