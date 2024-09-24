@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use simple_fn::utils::response;
 use ulid::Ulid;
+use validator::Validate;
 
 #[derive(Debug, Serialize, Deserialize, Builder)]
 struct Person {
@@ -23,10 +24,15 @@ struct Lambda {
     table_name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Validate)]
 struct LambdaInput {
+    #[validate(length(min = 1))]
+    #[serde(rename = "firstName")]
     first_name: String,
+    #[validate(length(min = 1))]
+    #[serde(rename = "lastName")]
     last_name: String,
+    #[validate(range(min = 1))]
     age: u32,
 }
 
@@ -43,32 +49,23 @@ impl From<LambdaInput> for Person {
 
 impl Lambda {
     pub async fn handler(&self, event: Request) -> Result<impl IntoResponse, LambdaError> {
-        let body: Option<LambdaInput> = match event.payload() {
-            Ok(p) => p,
-            Err(e) => {
-                return Ok(response::api_response(
-                    StatusCode::BAD_REQUEST,
-                    e.to_string(),
-                ));
-            }
+        // validate event body
+        let body = match event.payload::<LambdaInput>() {
+            Ok(Some(p)) => match p.validate() {
+                Ok(_) => p,
+                Err(e) => return Ok(response::api(StatusCode::BAD_REQUEST, e)),
+            },
+            Ok(None) => return Ok(response::api(StatusCode::BAD_REQUEST, "Invalid payload")),
+            Err(e) => return Ok(response::api(StatusCode::BAD_REQUEST, e.to_string())),
         };
 
-        let input = match body {
-            Some(p) => p,
-            None => {
-                return Ok(response::api_response(
-                    StatusCode::BAD_REQUEST,
-                    "Invalid payload",
-                ));
-            }
-        };
-
-        let person: Person = input.into();
+        let person: Person = body.into();
 
         let put_item_request = self
             .dynamodb_client
             .put_item()
             .table_name(self.table_name.clone())
+            .item("id", AttributeValue::S(person.id.clone()))
             .item("firstName", AttributeValue::S(person.first_name.clone()))
             .item("lastName", AttributeValue::S(person.last_name.clone()))
             .item("age", AttributeValue::N(person.age.to_string()))
@@ -77,11 +74,11 @@ impl Lambda {
 
         match put_item_request {
             Ok(_) => {
-                let resp = response::api_response(StatusCode::OK, json!({ "person": person }));
+                let resp = response::api(StatusCode::OK, json!({ "person": person }));
                 Ok(resp)
             }
             Err(_) => {
-                let resp = response::api_response(
+                let resp = response::api(
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Error storing person info",
                 );

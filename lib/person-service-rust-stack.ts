@@ -20,7 +20,7 @@ export class PersonServiceRustStack extends cdk.Stack {
     super(scope, id, props);
 
     const personsTable = new ddb.Table(this, 'personsTable', {
-      partitionKey: { name: 'firstName', type: ddb.AttributeType.STRING },
+      partitionKey: { name: 'id', type: ddb.AttributeType.STRING },
       billingMode: ddb.BillingMode.PAY_PER_REQUEST,
     });
 

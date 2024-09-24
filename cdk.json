@@ -1,7 +1,7 @@
 {
   "app": "npx tsx bin/person-service-rust.ts",
   "watch": {
-    "include": ["bin", "lib", "src"]
+    "include": ["bin", "lib", "target/lambda"]
   },
   "context": {
     "@aws-cdk/aws-lambda:recognizeLayerVersion": true,

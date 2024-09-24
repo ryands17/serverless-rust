@@ -1,3 +1,5 @@
+use serde_json::Value;
+
 pub fn merge(a: &mut Value, b: Value) {
     match (a, b) {
         (Value::Object(a), Value::Object(b)) => {

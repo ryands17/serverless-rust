@@ -7,11 +7,12 @@
   "scripts": {
     "build": "tsc",
     "build:fns": "cargo lambda build --release --arm64",
-    "build:fns:dev": "cargo lambda build --arm64",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "dev": "pnpm cdk deploy --watch --require-approval=never",
+    "dev:cdk": "pnpm cdk deploy --watch --require-approval=never",
+    "dev:lambda": "cargo watch -c -w src -x 'lambda build --arm64'",
+    "dev": "p run \"/^dev:.*/\"",
     "deploy": "pnpm build:fns && pnpm cdk deploy",
     "prepare": "husky"
   },

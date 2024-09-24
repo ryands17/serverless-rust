@@ -3,7 +3,7 @@ use serde_json::{json, Value};
 
 use super::json::merge;
 
-pub fn api_response<T: serde::Serialize>(status_code: StatusCode, body: T) -> Response<String> {
+pub fn api<T: serde::Serialize>(status_code: StatusCode, body: T) -> Response<String> {
     if status_code.is_success() {
         let mut response = json!({
             "success": status_code.is_success(),
