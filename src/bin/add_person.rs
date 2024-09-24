@@ -1,5 +1,3 @@
-use std::env;
-
 use aws_sdk_dynamodb::{types::AttributeValue, Client as DynamoDbClient};
 use bon::Builder;
 use lambda_http::{
@@ -48,20 +46,14 @@ impl Lambda {
         let body: Option<LambdaInput> = match event.payload() {
             Ok(p) => p,
             Err(e) => {
-                return Ok(api_response(
-                    StatusCode::BAD_REQUEST,
-                    json!({ "error": e.to_string() }),
-                ));
+                return Ok(api_response(StatusCode::BAD_REQUEST, e.to_string()));
             }
         };
 
         let input = match body {
             Some(p) => p,
             None => {
-                return Ok(api_response(
-                    StatusCode::BAD_REQUEST,
-                    json!({ "error": "Invalid payload" }),
-                ));
+                return Ok(api_response(StatusCode::BAD_REQUEST, "Invalid payload"));
             }
         };
 
@@ -79,16 +71,13 @@ impl Lambda {
 
         match put_item_request {
             Ok(_) => {
-                let resp = api_response(
-                    StatusCode::OK,
-                    json!({ "message": "Person data stored successfully", "data": { "person": person } }),
-                );
+                let resp = api_response(StatusCode::OK, json!({ "person": person }));
                 Ok(resp)
             }
             Err(_) => {
                 let resp = api_response(
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    json!({ "message": "Error storing person info" }),
+                    "Error storing person info",
                 );
                 Ok(resp)
             }
@@ -105,7 +94,7 @@ async fn main() -> Result<(), LambdaError> {
     let config = aws_config::load_from_env().await;
     let dynamodb_client = DynamoDbClient::new(&config);
 
-    let table_name = env::var("TABLE_NAME").expect("TABLE_NAME env var should be set");
+    let table_name = std::env::var("TABLE_NAME").expect("TABLE_NAME env var should be set");
 
     let lambda = Lambda::builder()
         .dynamodb_client(dynamodb_client)
